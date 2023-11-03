@@ -3,7 +3,7 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 export const bdConfig: MysqlConnectionOptions = {
-  type: 'mariadb',
+  type: 'mysql',
   host: process.env.DATABASE_HOST,
   username: process.env.DATABASE_USER,
   password: process.env.DATABASE_PASSWORD,
