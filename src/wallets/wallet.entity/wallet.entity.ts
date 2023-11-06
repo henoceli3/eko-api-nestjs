@@ -9,14 +9,26 @@ export class WalletEntity {
   uuid: string;
 
   @Column({ nullable: false })
-  userId: number;
+  userUuid: string;
 
-  @Column({ nullable: false, length: 100 })
+  @Column({ nullable: false })
   name: string;
 
-  @Column({ nullable: false, length: 100 })
+  @Column({ nullable: false })
   mnemonic: string;
 
   @Column({ nullable: false })
   isActive: boolean;
+
+  @Column({ nullable: false })
+  iv: string;
+
+  @Column({ nullable: true })
+  createdAt: Date;
+
+  @Column({ nullable: true })
+  updatedAt: Date;
+
+  @Column({ nullable: true })
+  deletedAt: Date;
 }

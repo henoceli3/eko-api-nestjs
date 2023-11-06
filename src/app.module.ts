@@ -5,6 +5,7 @@ import { UsersModule } from './users/users.module';
 import { WalletsModule } from './wallets/wallets.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOptions';
+import { AuthentificationModule } from './authentification/authentification.module';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
@@ -19,7 +20,7 @@ const bdConfig: MysqlConnectionOptions = {
 };
 
 @Module({
-  imports: [TypeOrmModule.forRoot(bdConfig), UsersModule, WalletsModule],
+  imports: [TypeOrmModule.forRoot(bdConfig), UsersModule, WalletsModule, AuthentificationModule],
   controllers: [AppController],
   providers: [AppService],
 })
