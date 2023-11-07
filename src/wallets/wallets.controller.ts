@@ -7,8 +7,8 @@ import { UserEntity } from 'src/users/user.entity/user.entity';
 @Controller('wallets')
 export class WalletsController {
   constructor(
-    private service: WalletsService,
-    private usersService: UsersService,
+    private readonly service: WalletsService,
+    private readonly usersService: UsersService,
   ) {}
 
   @Post('create')

@@ -8,6 +8,9 @@ export class UserEntity {
   @Column({ unique: true, nullable: false })
   uuid?: string;
 
+  @Column({ unique: true, nullable: false })
+  apiKey?: string;
+
   @Column({ nullable: false, length: 100 })
   name: string;
 
