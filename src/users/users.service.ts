@@ -30,6 +30,7 @@ export class UsersService {
     const userCreated = this.usersRepository.save({
       uuid: uuidv4(),
       apiKey: short.generate(),
+      avatar: '',
       name: name.toLowerCase(),
       lastName: lastName.toLowerCase(),
       email: email.toLowerCase(),
@@ -47,7 +48,15 @@ export class UsersService {
 
   async getUserByUuid(uuid: string) {
     const findUser = await this.usersRepository.findOne({
-      select: ['uuid', 'email', 'name', 'lastName', 'createdAt', 'updatedAt'],
+      select: [
+        'uuid',
+        'email',
+        'name',
+        'avatar',
+        'lastName',
+        'createdAt',
+        'updatedAt',
+      ],
       where: { uuid: uuid, isActive: true },
     });
     if (!findUser) {
@@ -67,25 +76,12 @@ export class UsersService {
     };
   }
 
-  async updateNameAndLastName(
-    uuid: string,
-    name: string,
-    lastName: string,
-    password: string,
-  ) {
-    const existUser = await this.usersRepository.findOne({
-      select: ['name', 'lastName', 'password', 'updatedAt'],
+  async updateNameAndLastName(uuid: string, name: string, lastName: string) {
+    const existUser = await this.usersRepository.exist({
       where: { uuid: uuid.trim(), isActive: true },
     });
     if (!existUser) {
       throw new NotFoundException('User not found');
-    }
-    const isPasswordValid = await bcrypt.compare(
-      password.trim(),
-      existUser.password,
-    );
-    if (!isPasswordValid) {
-      throw new NotFoundException('Invalid password');
     }
     await this.usersRepository.update(
       { uuid: uuid.trim() },
@@ -97,6 +93,23 @@ export class UsersService {
     );
     return {
       message: 'User updated',
+      data: {},
+    };
+  }
+
+  async updateEmail(uuid: string, email: string) {
+    const existEmail = await this.usersRepository.exist({
+      where: { email: email, isActive: true },
+    });
+    if (existEmail) {
+      throw new NotFoundException('Email already exists');
+    }
+    await this.usersRepository.update(
+      { uuid: uuid },
+      { email: email.toLowerCase(), updatedAt: new Date() },
+    );
+    return {
+      message: 'Email updated',
       data: {},
     };
   }
@@ -122,6 +135,25 @@ export class UsersService {
     );
     return {
       message: 'User deleted',
+      data: {},
+    };
+  }
+
+  async reactivateUser(uuid: string) {
+    this.usersRepository.update(
+      { uuid: uuid },
+      { isActive: true, deletedAt: null },
+    );
+    return {
+      message: 'User reactivated',
+      data: {},
+    };
+  }
+
+  async acceptTermsAndConditions(uuid: string) {
+    await this.usersRepository.update({ uuid: uuid }, { acceptedTerms: true });
+    return {
+      message: 'Terms and conditions accepted',
       data: {},
     };
   }

@@ -54,18 +54,18 @@ export class WalletsService {
     return decryptedText.toString();
   }
 
-  async createWallet(wallet: WalletEntity) {
+  async createWallet(mnemonic: string, name: string, userUuid: string) {
     const existWallet = await this.walletsRepository.exist({
-      where: { mnemonic: wallet.mnemonic.trim() },
+      where: { mnemonic: mnemonic.trim() },
     });
     if (existWallet) {
       throw new NotFoundException('Wallet already exists');
     }
-    const crypt = await this.encrypt(wallet.mnemonic);
+    const crypt = await this.encrypt(mnemonic);
     const walletCreated = await this.walletsRepository.save({
       uuid: uuidv4(),
-      userUuid: wallet.userUuid,
-      name: wallet.name.trim(),
+      userUuid: userUuid,
+      name: name.trim(),
       mnemonic: crypt.data.content,
       iv: crypt.data.iv,
       isActive: true,
@@ -79,16 +79,16 @@ export class WalletsService {
     };
   }
 
-  async updateWalletName(wallet: WalletEntity) {
+  async updateWalletName(uuid: string, name: string) {
     const existWallet = await this.walletsRepository.exist({
-      where: { uuid: wallet.uuid.trim(), isActive: true },
+      where: { uuid: uuid.trim(), isActive: true },
     });
     if (!existWallet) {
       throw new NotFoundException('Wallet not found');
     }
     await this.walletsRepository.update(
-      { uuid: wallet.uuid.trim() },
-      { name: wallet.name.trim(), updatedAt: new Date() },
+      { uuid: uuid.trim() },
+      { name: name.trim(), updatedAt: new Date() },
     );
     return {
       message: 'Wallet name updated',
@@ -96,29 +96,29 @@ export class WalletsService {
     };
   }
 
-  async deleteWallet(wallet: WalletEntity, user: UserEntity) {
+  async deleteWallet(uuid: string, userUuid: string, password: string) {
     const existWallet = await this.walletsRepository.exist({
-      where: { uuid: wallet.uuid, isActive: true },
+      where: { uuid: uuid, isActive: true },
     });
     if (!existWallet) {
       throw new NotFoundException('Wallet not found');
     }
     const existUser = await this.usersRepository.findOne({
       select: ['password'],
-      where: { uuid: user.uuid.trim(), isActive: true },
+      where: { uuid: userUuid.trim(), isActive: true },
     });
     if (!existUser) {
       throw new NotFoundException('User not found');
     }
     const isPasswordValid = await bcrypt.compare(
-      user.password.trim(),
+      password.trim(),
       existUser.password,
     );
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid password');
     }
     await this.walletsRepository.update(
-      { uuid: wallet.uuid.trim() },
+      { uuid: uuid.trim() },
       { isActive: false, deletedAt: new Date() },
     );
     return {
@@ -127,10 +127,10 @@ export class WalletsService {
     };
   }
 
-  async getAllWalletsByUserUuid(wallet: WalletEntity) {
+  async getAllWalletsByUserUuid(userUuid: string) {
     const wallets = await this.walletsRepository.find({
       select: ['uuid', 'name', 'mnemonic', 'iv'],
-      where: { userUuid: wallet.userUuid.trim(), isActive: true },
+      where: { userUuid: userUuid.trim(), isActive: true },
     });
     const decrypWallet = wallets.map(async (wallet) => {
       return {

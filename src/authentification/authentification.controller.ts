@@ -43,14 +43,15 @@ export class AuthentificationController {
   async generateTwoFactorAuthenticationSecret(@Body('uuid') uuid: string) {
     await this.service.generateTwoFactorAuthenticationSecret(uuid);
     const otp = await this.service.generateTwoFactorAuthenticationCode(uuid);
+    const email = (await this.usersService.getUserByUuid(uuid)).data.email;
     this.service.sentMail({
       from: 'Eko Wallet <helitako16@gmail.com>',
-      to: (await this.usersService.getUserByUuid(uuid)).data.email,
+      to: email,
       subject: 'Authentication code',
       text: `Authentication code: ${otp.data}`,
     });
     return {
-      message: 'Authentication code sent',
+      message: `Authentication code sent on ${email}`,
       data: {},
     };
   }
@@ -92,11 +93,11 @@ export class AuthentificationController {
   @Post('2fa/verify')
   @HttpCode(200)
   async verifyTwoFactorAuthentication(
-    @Body('twoFactorAuthenticationCode') twoFactorAuthenticationCode: string,
+    @Body('code') code: string,
     @Body('uuid') uuid: string,
   ) {
     const isCodeValid = this.service.isTwoFactorAuthenticationCodeValid(
-      twoFactorAuthenticationCode,
+      code,
       uuid,
     );
     if ((await isCodeValid) === false) {

@@ -11,6 +11,9 @@ export class UserEntity {
   @Column({ unique: true, nullable: false })
   apiKey?: string;
 
+  @Column({ nullable: true })
+  avatar?: string;
+
   @Column({ nullable: false, length: 100 })
   name: string;
 
@@ -42,5 +45,8 @@ export class UserEntity {
   twoFactorAuthSecret?: string;
 
   @Column({ default: false })
-  public isTwoFactorEnabled: boolean;
+  isTwoFactorEnabled: boolean;
+
+  @Column({ default: false })
+  acceptedTerms: boolean;
 }

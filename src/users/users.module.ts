@@ -28,7 +28,6 @@ export class UsersModule implements NestModule {
         body('uuid').notEmpty().isString().escape(),
         body('name').notEmpty().isString().escape(),
         body('lastName').notEmpty().isString().escape(),
-        body('password').notEmpty().isString().escape(),
       )
       .forRoutes('users/updateNameAndLastName');
     consumer
@@ -37,5 +36,11 @@ export class UsersModule implements NestModule {
         body('password').notEmpty().isString().escape(),
       )
       .forRoutes('users/deleteUser');
+    consumer
+      .apply(body('uuid').notEmpty().isString().escape())
+      .forRoutes('users/reactivateUser');
+    consumer
+      .apply(body('uuid').notEmpty().isString().escape())
+      .forRoutes('users/acceptTermsAndConditions');
   }
 }

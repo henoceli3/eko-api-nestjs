@@ -58,7 +58,21 @@ export class UsersController {
     if (!result.isEmpty()) {
       throw new BadRequestException(result);
     }
-    return this.service.updateNameAndLastName(uuid, name, lastName, password);
+    return this.service.updateNameAndLastName(uuid, name, lastName);
+  }
+
+  @Post('updateEmail')
+  @HttpCode(200)
+  updateEmail(
+    @Body('uuid') uuid: string,
+    @Body('email') email: string,
+    @Req() request: Request,
+  ) {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      throw new BadRequestException(result);
+    }
+    return this.service.updateEmail(uuid, email);
   }
 
   @Post('deleteUser')
@@ -73,5 +87,28 @@ export class UsersController {
       throw new BadRequestException(result);
     }
     return this.service.deleteUser(uuid, password);
+  }
+
+  @Post('reactivateUser')
+  @HttpCode(200)
+  reActivateUser(@Body('uuid') uuid: string, @Req() request: Request) {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      throw new BadRequestException(result);
+    }
+    return this.service.reactivateUser(uuid);
+  }
+
+  @Post('acceptTermsAndConditions')
+  @HttpCode(200)
+  acceptTermsAndConditions(
+    @Body('uuid') uuid: string,
+    @Req() request: Request,
+  ) {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      throw new BadRequestException(result);
+    }
+    return this.service.acceptTermsAndConditions(uuid);
   }
 }

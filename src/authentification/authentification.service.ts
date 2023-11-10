@@ -57,7 +57,13 @@ export class AuthentificationService {
 
   async login(email: string, password: string) {
     const user = await this.usersRepository.findOne({
-      select: ['uuid', 'email', 'password', 'isTwoFactorEnabled'],
+      select: [
+        'uuid',
+        'email',
+        'password',
+        'isTwoFactorEnabled',
+        'acceptedTerms',
+      ],
       where: { email: email, isActive: true },
     });
     if (!user) {
@@ -71,11 +77,12 @@ export class AuthentificationService {
       const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET);
       return {
         message: 'User logged in',
-        isTwoFactorEnabled: false,
         data: {
+          isTwoFactorEnabled: user.isTwoFactorEnabled,
+          acceptedTerms: user.acceptedTerms,
           uuid: user.uuid,
+          token: token,
         },
-        token: token,
       };
     } else {
       const otp = await this.generateTwoFactorAuthenticationCode(user.uuid);
@@ -87,9 +94,10 @@ export class AuthentificationService {
       });
       return {
         message: 'awaiting authentication code',
-        isTwoFactorEnabled: true,
+
         data: {
           uuid: user.uuid,
+          isTwoFactorEnabled: user.isTwoFactorEnabled,
         },
       };
     }
@@ -104,7 +112,7 @@ export class AuthentificationService {
       throw new NotFoundException('User not found');
     }
     const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET);
-    const resetLink = `http://localhost:${process.env.PORT}/users/resetPassword/${user.email}/${token}`;
+    const resetLink = `http://localhost:${process.env.PORT}/authentification/resetPassword/${user.email}/${token}`;
     const mailOptions = {
       from: 'Eko Wallet <helitako16@gmail.com>',
       to: email,
@@ -135,6 +143,12 @@ export class AuthentificationService {
       { uuid: user.uuid },
       { password: hashedPassword, resetToken: '' },
     );
+    this.sentMail({
+      from: 'Eko Wallet <helitako16@gmail.com>',
+      to: email,
+      subject: 'Mot de passe réinitialisé',
+      text: `Mot de passe réinitialisé avec succès`,
+    });
     return {
       message: 'Password updated',
       data: {},

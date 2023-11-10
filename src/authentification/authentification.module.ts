@@ -4,7 +4,7 @@ import { AuthentificationService } from './authentification.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from 'src/users/user.entity/user.entity';
 import { UsersService } from 'src/users/users.service';
-import { LoggerMiddleware } from './middleware/logger-middleware/logger-middleware';
+import { body, param } from 'express-validator';
 
 @Module({
   imports: [TypeOrmModule.forFeature([UserEntity])],
@@ -13,6 +13,39 @@ import { LoggerMiddleware } from './middleware/logger-middleware/logger-middlewa
 })
 export class AuthentificationModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes('*');
+    consumer
+      .apply(
+        body('email').notEmpty().isEmail().trim().escape(),
+        body('password').notEmpty().isString().escape(),
+      )
+      .forRoutes('authentification/login');
+    consumer
+      .apply(body('email').notEmpty().isEmail().escape())
+      .forRoutes('authentification/forgotPassword');
+    consumer
+      .apply(
+        body('password').notEmpty().isString().escape(),
+        param('email').notEmpty().isEmail().escape(),
+        param('token').notEmpty().isString().escape(),
+      )
+      .forRoutes('authentification/resetPassword/:email/:token');
+    consumer
+      .apply(
+        body('twoFactorAuthenticationCode').notEmpty().isString().escape(),
+        body('uuid').notEmpty().isString().escape(),
+      )
+      .forRoutes('authentification/2fa/turnOn');
+    consumer
+      .apply(
+        body('twoFactorAuthenticationCode').notEmpty().isString().escape(),
+        body('uuid').notEmpty().isString().escape(),
+      )
+      .forRoutes('authentification/2fa/turnOff');
+    consumer
+      .apply(
+        body('twoFactorAuthenticationCode').notEmpty().isString().escape(),
+        body('uuid').notEmpty().isString().escape(),
+      )
+      .forRoutes('authentification/2fa/verify');
   }
 }

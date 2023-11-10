@@ -1,8 +1,15 @@
-import { Body, Controller, Delete, HttpCode, Post } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  HttpCode,
+  Post,
+  Req,
+} from '@nestjs/common';
 import { WalletsService } from './wallets.service';
-import { WalletEntity } from './wallet.entity/wallet.entity';
 import { UsersService } from 'src/users/users.service';
-import { UserEntity } from 'src/users/user.entity/user.entity';
+import { validationResult } from 'express-validator';
 
 @Controller('wallets')
 export class WalletsController {
@@ -11,33 +18,41 @@ export class WalletsController {
     private readonly usersService: UsersService,
   ) {}
 
-  @Post('create')
+  @Post('createWallet')
   @HttpCode(200)
-  async createWallet(@Body('wallet') wallet: WalletEntity) {
+  async createWallet(@Body('name') name: string, userUuid: string) {
     const mnemonic = this.service.generateMnemonic(128);
-    wallet.mnemonic = mnemonic;
-    return this.service.createWallet(wallet);
+    return this.service.createWallet(mnemonic, name, userUuid);
   }
 
-  @Post('updateName')
+  @Post('updateWalletName')
   @HttpCode(200)
-  async updateWalletName(@Body('wallet') wallet: WalletEntity) {
-    return this.service.updateWalletName(wallet);
+  async updateWalletName(
+    @Body('name') name: string,
+    @Body('uuid') uuid: string,
+    @Req() request: Request,
+  ) {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      throw new BadRequestException(result);
+    }
+    return this.service.updateWalletName(name, uuid);
   }
 
-  @Delete('delete')
+  @Delete('deleteWallet')
   @HttpCode(200)
   async deleteWallet(
-    @Body('wallet') wallet: WalletEntity,
-    @Body('user') user: UserEntity,
+    @Body('uuid') uuid: string,
+    @Body('userUuid') userUuid: string,
+    @Body('password') password: string,
   ) {
-    return this.service.deleteWallet(wallet, user);
+    return this.service.deleteWallet(uuid, userUuid, password);
   }
 
-  @Post('getAllByUserUuid')
+  @Post('getAllWalletsByUserUuid')
   @HttpCode(200)
-  async getAllWalletsByUserUuid(@Body('wallet') wallet: WalletEntity) {
-    return this.service.getAllWalletsByUserUuid(wallet);
+  async getAllWalletsByUserUuid(@Body('userUuid') userUuid: string) {
+    return this.service.getAllWalletsByUserUuid(userUuid);
   }
 
   @Post('generateEthereumAddresses')
