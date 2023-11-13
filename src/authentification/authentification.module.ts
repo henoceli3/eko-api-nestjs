@@ -30,17 +30,8 @@ export class AuthentificationModule implements NestModule {
       )
       .forRoutes('authentification/resetPassword/:email/:token');
     consumer
-      .apply(
-        body('twoFactorAuthenticationCode').notEmpty().isString().escape(),
-        body('uuid').notEmpty().isString().escape(),
-      )
-      .forRoutes('authentification/2fa/turnOn');
-    consumer
-      .apply(
-        body('twoFactorAuthenticationCode').notEmpty().isString().escape(),
-        body('uuid').notEmpty().isString().escape(),
-      )
-      .forRoutes('authentification/2fa/turnOff');
+      .apply(body('uuid').notEmpty().isString().escape())
+      .forRoutes('authentification/2fa/turn');
     consumer
       .apply(
         body('twoFactorAuthenticationCode').notEmpty().isString().escape(),

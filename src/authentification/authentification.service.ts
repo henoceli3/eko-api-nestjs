@@ -162,24 +162,17 @@ export class AuthentificationService {
     );
   }
 
-  async turnOnTwoFactorAuthentication(uuid: string) {
+  async turnTwoFactorAuthentication(uuid: string) {
+    const user = await this.usersRepository.findOne({
+      select: ['isTwoFactorEnabled'],
+      where: { uuid: uuid, isActive: true },
+    });
     await this.usersRepository.update(
       { uuid: uuid },
-      { isTwoFactorEnabled: true },
+      { isTwoFactorEnabled: !user.isTwoFactorEnabled },
     );
     return {
-      message: 'Two factor authentication enabled',
-      data: {},
-    };
-  }
-
-  async turnOffTwoFactorAuthentication(uuid: string) {
-    await this.usersRepository.update(
-      { uuid: uuid },
-      { isTwoFactorEnabled: false },
-    );
-    return {
-      message: 'Two factor authentication disabled',
+      message: 'Two factor state changed',
       data: {},
     };
   }

@@ -56,6 +56,7 @@ export class UsersService {
         'lastName',
         'createdAt',
         'updatedAt',
+        'isTwoFactorEnabled',
       ],
       where: { uuid: uuid, isActive: true },
     });

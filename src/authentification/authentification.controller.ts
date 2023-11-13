@@ -56,38 +56,10 @@ export class AuthentificationController {
     };
   }
 
-  @Post('2fa/turnOn')
+  @Post('2fa/turn')
   @HttpCode(200)
-  async turnOnTwoFactorAuthentication(
-    @Body('twoFactorAuthenticationCode') twoFactorAuthenticationCode: string,
-    @Body('uuid') uuid: string,
-  ) {
-    const isCodeValid = this.service.isTwoFactorAuthenticationCodeValid(
-      twoFactorAuthenticationCode,
-      uuid,
-    );
-    if ((await isCodeValid) === false) {
-      throw new UnauthorizedException('Wrong authentication code');
-    } else {
-      return this.service.turnOnTwoFactorAuthentication(uuid);
-    }
-  }
-
-  @Post('2fa/turnOff')
-  @HttpCode(200)
-  async turnOffTwoFactorAuthentication(
-    @Body('twoFactorAuthenticationCode') twoFactorAuthenticationCode: string,
-    @Body('uuid') uuid: string,
-  ) {
-    const isCodeValid = this.service.isTwoFactorAuthenticationCodeValid(
-      twoFactorAuthenticationCode,
-      uuid,
-    );
-    if ((await isCodeValid) === false) {
-      throw new UnauthorizedException('Wrong authentication code');
-    } else {
-      return this.service.turnOffTwoFactorAuthentication(uuid);
-    }
+  async turnOnTwoFactorAuthentication(@Body('uuid') uuid: string) {
+    return this.service.turnTwoFactorAuthentication(uuid);
   }
 
   @Post('2fa/verify')
