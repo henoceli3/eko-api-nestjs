@@ -8,7 +8,7 @@ import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOpti
 import { AuthentificationModule } from './authentification/authentification.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import * as dotenv from 'dotenv';
-import { LoggerMiddleware } from './authentification/middleware/logger-middleware/logger-middleware';
+import { LoggerMiddleware } from './middleware/logger-middleware/logger-middleware';
 dotenv.config();
 
 const bdConfig: MysqlConnectionOptions = {
