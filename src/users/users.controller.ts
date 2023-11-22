@@ -6,9 +6,13 @@ import {
   HttpCode,
   Post,
   Req,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { validationResult } from 'express-validator';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { extname } from 'path';
 
 @Controller('users')
 export class UsersController {
@@ -73,6 +77,50 @@ export class UsersController {
       throw new BadRequestException(result);
     }
     return this.service.updateEmail(uuid, email);
+  }
+
+  @Post('updateUserAvatar')
+  @HttpCode(200)
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: {
+        destination: './uploads/avatars',
+        filename: (req: Request, file: Express.Multer.File, cb) => {
+          const ext = extname(file.originalname);
+          const fileName = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+          cb(null, `${file.fieldname}-${fileName}${ext}`);
+        },
+      },
+    }),
+  )
+  async updateUserAvatar(
+    @UploadedFile() avatar: Express.Multer.File,
+    @Body('uuid') uuid: string,
+  ) {
+    if (!avatar) {
+      throw new BadRequestException("Aucun fichier n'a été téléchargé.");
+    }
+    try {
+      await this.service.updateUserAvatar(uuid, avatar.filename);
+    } catch (error) {
+      throw new BadRequestException(
+        "Erreur lors de la mise à jour de l'avatar.",
+      );
+    }
+  }
+
+  @Post('updatePassword')
+  @HttpCode(200)
+  updatePassword(
+    @Body('uuid') uuid: string,
+    @Body('password') password: string,
+    @Req() request: Request,
+  ) {
+    const result = validationResult(request);
+    if (!result.isEmpty()) {
+      throw new BadRequestException(result);
+    }
+    return this.service.updatePassword(uuid, password);
   }
 
   @Post('deleteUser')

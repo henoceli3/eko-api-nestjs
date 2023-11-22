@@ -30,6 +30,20 @@ export class UsersModule implements NestModule {
         body('lastName').notEmpty().isString().escape(),
       )
       .forRoutes('users/updateNameAndLastName');
+
+    consumer
+      .apply(
+        body('uuid').notEmpty().isString().escape(),
+        body('email').notEmpty().isString().escape(),
+      )
+      .forRoutes('users/updateEmail');
+
+    consumer
+      .apply(
+        body('uuid').notEmpty().isString().escape(),
+        body('password').notEmpty().isString().escape(),
+      )
+      .forRoutes('users/updatePassword');
     consumer
       .apply(
         body('uuid').notEmpty().isString().escape(),

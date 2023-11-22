@@ -115,6 +115,33 @@ export class UsersService {
     };
   }
 
+  async updatePassword(uuid: string, password: string) {
+    const salt = await bcrypt.genSalt();
+    const hashPassword = await bcrypt.hash(password, salt);
+    await this.usersRepository.update(
+      { uuid: uuid },
+      { password: hashPassword, updatedAt: new Date() },
+    );
+    return {
+      message: 'Password updated',
+      data: {},
+    };
+  }
+
+  async updateUserAvatar(uuid: string, avatar: string) {
+    await this.usersRepository.update(
+      { uuid: uuid },
+      { avatar: avatar, updatedAt: new Date() },
+    );
+    const user = await this.getUserByUuid(uuid);
+    return {
+      message: 'Avatar updated',
+      data: {
+        avatar: user.data.avatar,
+      },
+    };
+  }
+
   async deleteUser(uuid: string, password: string) {
     const findedUser = await this.usersRepository.findOne({
       select: ['password', 'isActive'],
